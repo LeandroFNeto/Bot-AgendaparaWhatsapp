@@ -1,0 +1,32 @@
+services:
+  # Seu Bot Java
+  bot-java:
+    build: .
+    container_name: bot_java_recanto
+    ports:
+      - "8080:8080"
+    networks:
+      - bot-network
+    depends_on:
+      - wppconnect
+    restart: always
+
+  # Motor do WhatsApp com os Volumes ativados para não perder a sessão
+  wppconnect:
+    build: ./wppconnect-server
+    container_name: wppconnect_server
+    ports:
+      - "21465:21465"
+    environment:
+      - PORT=21465
+      - SECRET_KEY=THISISMYSECURETOKEN
+    networks:
+      - bot-network
+    volumes:
+      # Aqui está a mágica: salva os dados do zap numa pasta física no seu Windows
+      - ./dados-wpp/userDataDir:/usr/src/wpp-server/userDataDir
+      - ./dados-wpp/tokens:/usr/src/wpp-server/tokens
+
+networks:
+  bot-network:
+    driver: bridge
