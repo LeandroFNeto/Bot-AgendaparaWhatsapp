@@ -1,31 +1,52 @@
 services:
-  # Seu Bot Java
-  bot-java:
-    build: .
-    container_name: bot_java_recanto
+  # 1. Banco de Dados (Onde as tabelas Empresa, Dias e Preços moram)
+  db-bot:
+    image: postgres:15
+    container_name: postgres_recanto
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: bot_db
     ports:
-      - "8080:8080"
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
     networks:
       - bot-network
-    depends_on:
-      - wppconnect
-    restart: always
 
-  # Motor do WhatsApp com os Volumes ativados para não perder a sessão
+  # 2. Motor do WhatsApp (WPPConnect)
   wppconnect:
-    build: ./wppconnect-server
+    image: wppconnectorg/wppconnect-server:latest  # 👈 ESSA É A MUDANÇA
     container_name: wppconnect_server
+    restart: always
     ports:
       - "21465:21465"
     environment:
       - PORT=21465
-      - SECRET_KEY=THISISMYSECURETOKEN
+      - SECRET_KEY=minha_chave_secreta_123
+    volumes:
+      - ./dados-wpp/tokens:/usr/src/app/tokens
+      - ./dados-wpp/userDataDir:/usr/src/app/userDataDir
     networks:
       - bot-network
-    volumes:
-      # Aqui está a mágica: salva os dados do zap numa pasta física no seu Windows
-      - ./dados-wpp/userDataDir:/usr/src/wpp-server/userDataDir
-      - ./dados-wpp/tokens:/usr/src/wpp-server/tokens
+
+  # 3. Seu Bot Java (O Cérebro)
+  bot-java:
+    build: .
+    container_name: bot_java_recanto
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db-bot
+      - wppconnect
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-bot:5432/bot_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+    networks:
+      - bot-network
 
 networks:
   bot-network:
