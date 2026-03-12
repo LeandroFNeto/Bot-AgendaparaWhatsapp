@@ -28,7 +28,7 @@ public class ServicoLocacao {
             gerenciadorSessao.atualizarEstado(numeroCliente, "MENU_ENVIADO");
 
         } else if (textoRecebido.equals("1")) {
-            List<DiaReservaDTO> lista = controllerReserva.listarReservas();
+            List<DiaReservaDTO> lista = controllerReserva.listarReservas(empresa);
             servicoMensagem.enviarMensagemWPP(empresa, numeroCliente, formatarLista(lista));
             gerenciadorSessao.atualizarEstado(numeroCliente, "INICIO");
 
@@ -99,7 +99,7 @@ public class ServicoLocacao {
             gerenciadorSessao.atualizarEstado(numeroCliente, "INICIO");
         }else if (estadoAtual.equals("AGUARDANDO_DATA")) {
             try {
-                DiaReservaDTO dia = controllerReserva.pesquisarData(textoRecebido);
+                DiaReservaDTO dia = controllerReserva.pesquisarData(empresa,textoRecebido);
                 servicoMensagem.enviarMensagemWPP(empresa, numeroCliente, formatarDia(dia));
                 gerenciadorSessao.atualizarEstado(numeroCliente, "INICIO");
 

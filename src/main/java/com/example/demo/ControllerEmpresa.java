@@ -31,6 +31,7 @@ public class ControllerEmpresa {
             if (novaEmpresa.getLinkGoogleMaps() != null) empresaExistente.setLinkGoogleMaps(novaEmpresa.getLinkGoogleMaps());
             if (novaEmpresa.getLinkFotoPrincipal() != null) empresaExistente.setLinkFotoPrincipal(novaEmpresa.getLinkFotoPrincipal());
             if (novaEmpresa.getLinkGaleria()!= null) empresaExistente.setLinkGaleria(novaEmpresa.getLinkGaleria());
+            if (novaEmpresa.getGoogleCalendarId() != null) empresaExistente.setGoogleCalendarId(novaEmpresa.getGoogleCalendarId());
 
             // 🛑 A SESSÃO NÃO É ATUALIZADA AQUI!
             // Ela é a chave de ligação, então "travamos" ela para evitar que o bot perca a conexão.

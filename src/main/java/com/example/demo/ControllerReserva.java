@@ -3,7 +3,6 @@ package com.example.demo;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,12 +12,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.time.format.TextStyle;
-import java.util.Locale;
 
 @RestController
 public class ControllerReserva {
@@ -26,16 +21,32 @@ public class ControllerReserva {
     @Autowired
     private ControllerGoogleagenda agendaService;
 
-    @Value("${google.calendar.id}")
-    private String idDaAgenda;
+    // 1. Método para CRIAR a reserva (Já estava quase certo)
+    public void agendarNoGoogle(Empresa empresa, String dataReserva, String nomeCliente) throws Exception {
+        com.google.api.services.calendar.Calendar servicoAgenda = agendaService.conectarAgenda();
+        String calendarId = empresa.getGoogleCalendarId();
 
-    @GetMapping("/reservas")
-    public List<DiaReservaDTO> listarReservas(){
+        if(calendarId == null || calendarId.isEmpty()) {
+            System.out.println("⚠️ A empresa " + empresa.getNome() + " não cadastrou o ID da agenda no banco!");
+            return;
+        }
+
+
+        System.out.println("✅ Reserva salva na agenda da empresa: " + empresa.getNome());
+    }
+
+    // 2. Método para LISTAR (Agora recebe a Empresa)
+    // Removi o @GetMapping temporariamente se este for chamado diretamente pelo ServicoLocacao
+    public List<DiaReservaDTO> listarReservas(Empresa empresa){
         try{
             com.google.api.services.calendar.Calendar servicoGoogle = agendaService.conectarAgenda();
             DateTime agora = new DateTime(System.currentTimeMillis());
 
-            Events eventos = servicoGoogle.events().list(idDaAgenda)
+            String calendarId = empresa.getGoogleCalendarId();
+            if(calendarId == null) return null; // Trava de segurança
+
+            // CORREÇÃO: Passamos a variável calendarId no .list()
+            Events eventos = servicoGoogle.events().list(calendarId)
                     .setMaxResults(100)
                     .setTimeMin(agora)
                     .setOrderBy("startTime")
@@ -44,7 +55,7 @@ public class ControllerReserva {
 
             List<Event> itens = eventos.getItems();
 
-            if(itens.isEmpty()){
+            if(itens == null || itens.isEmpty()){
                 return null;
             }
 
@@ -53,13 +64,14 @@ public class ControllerReserva {
 
             for (Event evento : itens){
                 var inicio = evento.getStart();
-
-                if (inicio.getDateTime() != null){
-                    ZonedDateTime dataComHora = ZonedDateTime.parse(inicio.getDateTime().toString());
-                    diasAlugados.add(dataComHora.toLocalDate());
-                } else if (inicio.getDate() != null) {
-                    LocalDate dataSemHora = LocalDate.parse(inicio.getDate().toString());
-                    diasAlugados.add(dataSemHora);
+                if (inicio != null) {
+                    if (inicio.getDateTime() != null){
+                        ZonedDateTime dataComHora = ZonedDateTime.parse(inicio.getDateTime().toString());
+                        diasAlugados.add(dataComHora.toLocalDate());
+                    } else if (inicio.getDate() != null) {
+                        LocalDate dataSemHora = LocalDate.parse(inicio.getDate().toString());
+                        diasAlugados.add(dataSemHora);
+                    }
                 }
             }
 
@@ -78,7 +90,6 @@ public class ControllerReserva {
                     listaDias.add(new DiaReservaDTO(dataFormatada, nomeDiaSemana, "Disponível"));
                 }
             }
-
             return listaDias;
 
         } catch (Exception e) {
@@ -88,15 +99,13 @@ public class ControllerReserva {
         }
     }
 
-    @GetMapping("/reservas/{dataRecebida}")
-    public DiaReservaDTO pesquisarData(@PathVariable String dataRecebida) {
+    // 3. Método para PESQUISAR (Agora recebe a Empresa também)
+    public DiaReservaDTO pesquisarData(Empresa empresa, String dataRecebida) {
         try {
             DateTimeFormatter formatadorEntrada = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             LocalDate dataAlvo = LocalDate.parse(dataRecebida, formatadorEntrada);
 
-            // 🛑 A TRAVA: Se a data digitada for antes do dia de hoje (no passado)
             if (dataAlvo.isBefore(LocalDate.now())) {
-                // Lança a "batata quente" para o ControllerWhatsapp pegar
                 throw new IllegalArgumentException("Não é possível consultar datas que já passaram.");
             }
 
@@ -112,7 +121,11 @@ public class ControllerReserva {
 
             com.google.api.services.calendar.Calendar servicoGoogle = agendaService.conectarAgenda();
 
-            Events eventos = servicoGoogle.events().list(idDaAgenda)
+            String calendarId = empresa.getGoogleCalendarId();
+            if(calendarId == null) throw new RuntimeException("Empresa sem calendário configurado.");
+
+            // CORREÇÃO: Passamos a variável calendarId no .list()
+            Events eventos = servicoGoogle.events().list(calendarId)
                     .setTimeMin(tempoMinimo)
                     .setTimeMax(tempoMaximo)
                     .setSingleEvents(true)
@@ -120,19 +133,17 @@ public class ControllerReserva {
 
             List<Event> itens = eventos.getItems();
 
-            if (itens.isEmpty()) {
+            if (itens == null || itens.isEmpty()) {
                 return new DiaReservaDTO(dataRecebida, nomeDiaSemana, "Disponível");
             } else {
                 return new DiaReservaDTO(dataRecebida, nomeDiaSemana, "Alugado");
             }
 
         } catch (IllegalArgumentException e) {
-            // Se o erro foi a data no passado, apenas joga para o método que chamou
             throw e;
         } catch (Exception e) {
             System.out.println("⚠️ ERRO CRÍTICO NO GOOGLE CALENDAR (Pesquisar): " + e.getMessage());
             e.printStackTrace();
-            // Joga um erro genérico para o WhatsApp avisar que o formato foi inválido
             throw new RuntimeException("Erro ao buscar data: " + e.getMessage());
         }
     }

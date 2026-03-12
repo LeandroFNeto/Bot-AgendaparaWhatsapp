@@ -39,6 +39,18 @@ public class Empresa {
     @Column(columnDefinition = "TEXT")
     private String linkGaleria;
 
+    @Column(name = "google_calendar_id")
+    private String googleCalendarId;
+
+    // Não se esqueça de adicionar os Getters e Setters no final do ficheiro!
+    public String getGoogleCalendarId() {
+        return googleCalendarId;
+    }
+
+    public void setGoogleCalendarId(String googleCalendarId) {
+        this.googleCalendarId = googleCalendarId;
+    }
+
     public String getNome() {
         return nome;
     }
