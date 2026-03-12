@@ -17,19 +17,19 @@ services:
 
   # 2. Motor do WhatsApp (WPPConnect)
   wppconnect:
-    image: wppconnectorg/wppconnect-server:latest  # 👈 ESSA É A MUDANÇA
+    build: ./wppconnect-server
     container_name: wppconnect_server
-    restart: always
     ports:
       - "21465:21465"
     environment:
       - PORT=21465
-      - SECRET_KEY=minha_chave_secreta_123
-    volumes:
-      - ./dados-wpp/tokens:/usr/src/app/tokens
-      - ./dados-wpp/userDataDir:/usr/src/app/userDataDir
+      - SECRET_KEY=THISISMYSECURETOKEN
     networks:
       - bot-network
+    volumes:
+      # Aqui está a mágica: salva os dados do zap numa pasta física no seu Windows
+      - ./dados-wpp/userDataDir:/usr/src/wpp-server/userDataDir
+      - ./dados-wpp/tokens:/usr/src/wpp-server/tokens
 
   # 3. Seu Bot Java (O Cérebro)
   bot-java:
