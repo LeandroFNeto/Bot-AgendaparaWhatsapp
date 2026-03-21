@@ -1,5 +1,11 @@
-package com.example.demo;
+package com.example.demo.controller;
 
+import com.example.demo.model.Empresa;
+import com.example.demo.repository.EmpresaRepository;
+import com.example.demo.servico.GerenciadorSessao;
+import com.example.demo.strategy.FactoryModulo;
+import com.example.demo.servico.ServicoWppConnect;
+import com.example.demo.strategy.ModuloAtendimentoStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +21,7 @@ public class ControllerWhatsapp {
 
     // A Rececionista só precisa de 4 coisas agora:
     @Autowired
-    private WppConnectService wppConnectService;
+    private ServicoWppConnect wppConnectService;
 
     @Autowired
     private GerenciadorSessao gerenciadorSessao;
@@ -24,15 +30,11 @@ public class ControllerWhatsapp {
     private EmpresaRepository empresaRepository;
 
     @Autowired
-    private ServicoLocacao servicoLocacao; // 🔥 O Especialista!
+    private FactoryModulo moduloFactory; // 🔥 Trocamos o ServicoLocacao pela FACTORY!
 
     @PostMapping("/whatsapp")
     public ResponseEntity<Void> receberMensagem(@RequestBody Map<String, Object> payload) {
         try {
-            // 🕵️‍♂️ X9 LOG 1: Mostra tudo que chegou do WhatsApp.
-            // Isso vai te ajudar a ver o formato real do JSON no console.
-            // System.out.println("🕵️‍♂️ [X9] Payload completo recebido: " + payload);
-            // (Descomente a linha acima se quiser ver o JSON inteiro, mas é bem grande!)
 
             String textoRecebido = (String) payload.get("body");
             String tipoMensagem = (String) payload.get("type");
@@ -80,21 +82,19 @@ public class ControllerWhatsapp {
                 return ResponseEntity.ok().build();
             }
 
-            // 🧠 CONSULTA A SESSÃO
             String estadoAtual = gerenciadorSessao.obterEstadoAtual(numeroCliente);
 
             // 🔀 O ROTEADOR MÁGICO DO SaaS!
-            if ("LOCACAO".equals(empresa.getRamoDeAtuacao())) {
-                System.out.println("🔀 [X9] Cliente aprovado! Redirecionando para o Módulo de Locação...");
-                servicoLocacao.processarMensagem(empresa, numeroCliente, textoRecebido, estadoAtual);
-            }
-            else if ("BARBEARIA".equals(empresa.getRamoDeAtuacao())) {
-                System.out.println("🔀 Módulo de Barbearia ainda em construção...");
-            }
-            else {
-                System.out.println("⚠️ Ramo de atuação desconhecido: " + empresa.getRamoDeAtuacao());
-            }
+            try {
+                // 1. Pede para a fábrica a estratégia correta baseada no Ramo
+                ModuloAtendimentoStrategy estrategia = moduloFactory.obterEstrategia(empresa.getRamoDeAtuacao());
 
+                // 2. Manda processar sem se importar se é Locação, Barbearia ou Padaria!
+                estrategia.processarMensagem(empresa, numeroCliente, textoRecebido, estadoAtual);
+
+            } catch (IllegalArgumentException e) {
+                System.out.println("⚠️ " + e.getMessage());
+            }
         } catch (Exception e) {
             System.out.println("⚠️ Erro no fluxo: " + e.getMessage());
         }

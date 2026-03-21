@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.servico;
 
 
 import org.springframework.stereotype.Service;
@@ -6,7 +6,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @Service
-public class WppConnectService {
+public class ServicoWppConnect {
 
     // Guarda o token na memória desta classe
     private String tokenAutenticacao = null;

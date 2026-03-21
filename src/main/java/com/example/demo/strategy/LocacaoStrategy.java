@@ -1,6 +1,6 @@
 package com.example.demo.strategy; // Confirme se este é o seu pacote
 
-import com.example.demo.controller.ControllerReserva;
+import com.example.demo.servico.ServicoReserva;
 import com.example.demo.dto.DiaReservaDTO;
 import com.example.demo.model.DiaReserva;
 import com.example.demo.model.Empresa;
@@ -10,9 +10,11 @@ import com.example.demo.servico.ServicoMensagem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import com.example.demo.evento.EventoReservaConfirmada;
+import org.springframework.context.ApplicationEventPublisher;
 
 @Service
-public class ServicoLocacao {
+public class LocacaoStrategy implements ModuloAtendimentoStrategy {
 
     // --- DEPENDÊNCIAS INJETADAS ---
     @Autowired
@@ -22,7 +24,10 @@ public class ServicoLocacao {
     private GerenciadorSessao gerenciadorSessao;
 
     @Autowired
-    private ControllerReserva controllerReserva;
+    private ServicoReserva servicoReserva;
+
+    @Autowired
+    private ApplicationEventPublisher publicadorDeEventos;
 
     @Override
     public String getRamoDeAtuacao() {
@@ -39,7 +44,7 @@ public class ServicoLocacao {
             gerenciadorSessao.atualizarEstado(numeroCliente, "MENU_ENVIADO");
 
         } else if (textoRecebido.equals("1")) {
-            List<DiaReservaDTO> lista = controllerReserva.listarReservas(empresa);
+            List<DiaReservaDTO> lista = servicoReserva.listarReservas(empresa);
             servicoMensagem.enviarMensagemWPP(empresa, numeroCliente, formatarLista(lista));
             gerenciadorSessao.atualizarEstado(numeroCliente, "INICIO");
 
@@ -98,8 +103,6 @@ public class ServicoLocacao {
             String msgLocalizacao = """
                 📍 *Como Chegar ao %s*
                 
-                Estamos localizados a aproximadamente 1.5h de Londrina. O acesso é super tranquilo!
-                
                 Clique no link abaixo para abrir a rota direto no seu GPS:
                 👉 %s
                 
@@ -110,7 +113,7 @@ public class ServicoLocacao {
             gerenciadorSessao.atualizarEstado(numeroCliente, "INICIO");
         }else if (estadoAtual.equals("AGUARDANDO_DATA")) {
             try {
-                DiaReservaDTO dia = controllerReserva.pesquisarData(empresa,textoRecebido);
+                DiaReservaDTO dia = servicoReserva.pesquisarData(empresa,textoRecebido);
                 servicoMensagem.enviarMensagemWPP(empresa, numeroCliente, formatarDia(dia));
                 gerenciadorSessao.atualizarEstado(numeroCliente, "INICIO");
 

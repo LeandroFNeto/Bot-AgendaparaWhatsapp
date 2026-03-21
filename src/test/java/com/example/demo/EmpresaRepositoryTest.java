@@ -1,5 +1,7 @@
 package com.example.demo;
 
+import com.example.demo.model.Empresa;
+import com.example.demo.repository.EmpresaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 

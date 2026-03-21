@@ -1,4 +1,5 @@
-package com.example.demo;
+package com.example.demo.servico;
+import com.example.demo.model.EstadoUsuario;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

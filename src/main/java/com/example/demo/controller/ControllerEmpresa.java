@@ -1,5 +1,7 @@
-package com.example.demo;
+package com.example.demo.controller;
 
+import com.example.demo.model.Empresa;
+import com.example.demo.repository.EmpresaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

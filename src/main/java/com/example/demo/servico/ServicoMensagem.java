@@ -1,5 +1,6 @@
-package com.example.demo;
+package com.example.demo.servico;
 
+import com.example.demo.model.Empresa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +15,7 @@ import java.util.Map;
 public class ServicoMensagem {
 
     @Autowired
-    private WppConnectService wppConnectService;
+    private ServicoWppConnect wppConnectService;
 
     // Qualquer outro ficheiro do seu projeto agora pode chamar este método para mandar mensagem!
     public void enviarMensagemWPP(Empresa empresa, String numero, String texto) {

@@ -1,3 +1,13 @@
+# Ignorar TODAS as credenciais do Google
+src/main/resources/*.json
+
+# Ignorar variáveis de ambiente (Senhas do Docker)
+.env
+
+# Ignorar pastas de dados do Docker
+postgres_data/
+dados-wpp/
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar

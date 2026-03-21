@@ -1,13 +1,13 @@
 services:
-  # 1. Banco de Dados (Onde as tabelas Empresa, Dias e Preços moram)
+  # 1. Banco de Dados (Versão 17 para evitar erros de diretório do Postgres 18)
   db-bot:
-    image: postgres:15
+    image: postgres:17-alpine
     container_name: postgres_recanto
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: bot_db
+      POSTGRES_USER: ${MEU_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${MEU_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${MEU_POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -15,7 +15,7 @@ services:
     networks:
       - bot-network
 
-  # 2. Motor do WhatsApp (WPPConnect)
+  # 2. Servidor do WhatsApp (WPPConnect)
   wppconnect:
     build: ./wppconnect-server
     container_name: wppconnect_server
@@ -23,15 +23,14 @@ services:
       - "21465:21465"
     environment:
       - PORT=21465
-      - SECRET_KEY=THISISMYSECURETOKEN
+      - SECRET_KEY=${WPP_SECRET_KEY}
     networks:
       - bot-network
     volumes:
-      # Aqui está a mágica: salva os dados do zap numa pasta física no seu Windows
       - ./dados-wpp/userDataDir:/usr/src/wpp-server/userDataDir
       - ./dados-wpp/tokens:/usr/src/wpp-server/tokens
 
-  # 3. Seu Bot Java (O Cérebro)
+  # 3. Cérebro do Bot (Java Spring Boot)
   bot-java:
     build: .
     container_name: bot_java_recanto
@@ -39,15 +38,20 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db-bot
-      - wppconnect
+      db-bot:
+        condition: service_started
+      wppconnect:
+        condition: service_started
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-bot:5432/bot_db
-      - SPRING_DATASOURCE_USERNAME=user
-      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-bot:5432/${MEU_POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${MEU_POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${MEU_POSTGRES_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     networks:
       - bot-network
+
 
 networks:
   bot-network:
     driver: bridge
+

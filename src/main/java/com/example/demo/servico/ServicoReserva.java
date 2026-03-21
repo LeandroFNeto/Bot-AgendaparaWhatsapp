@@ -1,13 +1,12 @@
-package com.example.demo.controller;
+package com.example.demo.servico;
 
 import com.example.demo.dto.DiaReservaDTO;
 import com.example.demo.model.Empresa;
-import com.example.demo.servico.ServicoGoogleagenda;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -16,8 +15,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.time.format.TextStyle;
 
-@RestController
-public class ControllerReserva {
+@Service
+public class ServicoReserva {
 
     @Autowired
     private ServicoGoogleagenda agendaService;
