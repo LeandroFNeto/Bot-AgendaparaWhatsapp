@@ -1,5 +1,12 @@
-package com.example.demo; // Confirme se este é o seu pacote
+package com.example.demo.strategy; // Confirme se este é o seu pacote
 
+import com.example.demo.controller.ControllerReserva;
+import com.example.demo.dto.DiaReservaDTO;
+import com.example.demo.model.DiaReserva;
+import com.example.demo.model.Empresa;
+import com.example.demo.model.HorarioReserva;
+import com.example.demo.servico.GerenciadorSessao;
+import com.example.demo.servico.ServicoMensagem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -17,8 +24,12 @@ public class ServicoLocacao {
     @Autowired
     private ControllerReserva controllerReserva;
 
+    @Override
+    public String getRamoDeAtuacao() {
+        return "LOCACAO"; // Exatamente como está escrito no banco de dados
+    }
 
-    // --- O CÉREBRO PRINCIPAL ---
+    @Override
     public void processarMensagem(Empresa empresa, String numeroCliente, String textoRecebido, String estadoAtual) {
 
         String textoNormalizado = textoRecebido.trim().toLowerCase();

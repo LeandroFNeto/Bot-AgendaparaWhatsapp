@@ -1,11 +1,12 @@
-package com.example.demo;
+package com.example.demo.controller;
 
+import com.example.demo.dto.DiaReservaDTO;
+import com.example.demo.model.Empresa;
+import com.example.demo.servico.ServicoGoogleagenda;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -19,7 +20,7 @@ import java.time.format.TextStyle;
 public class ControllerReserva {
 
     @Autowired
-    private ControllerGoogleagenda agendaService;
+    private ServicoGoogleagenda agendaService;
 
     // 1. Método para CRIAR a reserva (Já estava quase certo)
     public void agendarNoGoogle(Empresa empresa, String dataReserva, String nomeCliente) throws Exception {
