@@ -19,10 +19,6 @@ WORKDIR /app
 # Copia o .jar gerado no Estágio 1
 COPY --from=build /app/target/*.jar app.jar
 
-# Copia as credenciais do Google para a raiz da aplicação no container
-# O seu código Java deve buscar o arquivo em "/app/crendecial.json" ou via classpath
-COPY src/main/resources/crendecial.json /app/crendecial.json
-
 EXPOSE 8080
 
 # Adicionamos um parâmetro para ajudar a identificar erros de fuso horário, comum em agendamentos

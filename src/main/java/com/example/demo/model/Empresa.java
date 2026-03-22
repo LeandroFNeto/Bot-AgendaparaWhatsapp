@@ -42,6 +42,31 @@ public class Empresa {
     @Column(name = "google_calendar_id")
     private String googleCalendarId;
 
+    @Column(name = "locacao_por_hora")
+    private Boolean locacaoPorHora = false;
+
+    @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
+    @OrderBy("ordemExibicao ASC") // O banco já traz ordenado!
+    private List<ModuloEmpresa> modulosAtivos;
+
+
+
+    public Boolean getLocacaoPorHora() {
+        return locacaoPorHora;
+    }
+
+    public void setLocacaoPorHora(Boolean locacaoPorHora) {
+        this.locacaoPorHora = locacaoPorHora;
+    }
+
+    public List<ModuloEmpresa> getModulosAtivos() {
+        return modulosAtivos;
+    }
+
+    public void setModulosAtivos(List<ModuloEmpresa> modulosAtivos) {
+        this.modulosAtivos = modulosAtivos;
+    }
+
     // Não se esqueça de adicionar os Getters e Setters no final do ficheiro!
     public String getGoogleCalendarId() {
         return googleCalendarId;
