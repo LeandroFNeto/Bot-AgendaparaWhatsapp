@@ -1,9 +1,10 @@
-package com.example.demo.servico;
+package com.example.demo.servico.observador;
 
 import com.example.demo.evento.EventoReservaConfirmada;
+import com.example.demo.servico.ServicoMensagem;
+import com.example.demo.servico.ServicoReserva;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
