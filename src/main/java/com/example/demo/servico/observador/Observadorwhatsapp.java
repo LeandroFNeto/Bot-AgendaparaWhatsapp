@@ -1,5 +1,8 @@
 package com.example.demo.servico.observador;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class Observadorwhatsapp {
 
     public void logSucesso(String sessao, String jid, String msg) {

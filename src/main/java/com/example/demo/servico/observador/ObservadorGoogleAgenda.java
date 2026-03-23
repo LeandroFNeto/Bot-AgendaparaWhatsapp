@@ -5,6 +5,7 @@ import com.example.demo.servico.ServicoMensagem;
 import com.example.demo.servico.ServicoReserva;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,8 +17,8 @@ public class ObservadorGoogleAgenda {
     @Autowired
     private ServicoMensagem servicoMensagem;
 
-    // Esta anotação diz ao Spring: "Sempre que alguém gritar EventoReservaConfirmada, executa isto!"
-    // O @Async (se configurarmos depois) fará isto rodar numa thread separada!
+
+    @Async
     @EventListener
     public void registarNoGoogle(EventoReservaConfirmada evento) {
         System.out.println("🎧 [OBSERVER] A escutar o evento... A agendar no Google para: " + evento.getNomeCliente());
