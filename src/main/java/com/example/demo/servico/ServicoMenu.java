@@ -3,11 +3,13 @@ package com.example.demo.servico;
 import com.example.demo.model.Empresa;
 import com.example.demo.model.ModuloEmpresa;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // 👈 Import necessário
 
 @Service
 public class ServicoMenu {
 
-    // 1. MONTA O MENU LENDO DIRETO DO BANCO DE DADOS
+    // 🔥 Mantém a conexão aberta para o Java conseguir buscar os módulos "preguiçosos"
+    @Transactional(readOnly = true)
     public String montarMenuPrincipal(Empresa empresa) {
         StringBuilder menu = new StringBuilder();
         menu.append(empresa.getMensagemSaudacao()).append("\n\n");
@@ -24,26 +26,24 @@ public class ServicoMenu {
         return menu.toString();
     }
 
-    // 2. DESCOBRE O QUE O CLIENTE QUER LENDO A MESMA ORDEM DO BANCO
+    @Transactional(readOnly = true) // 🔥 Aqui também!
     public String descobrirAcao(Empresa empresa, String numeroDigitado) {
         try {
             int numero = Integer.parseInt(numeroDigitado);
             int contador = 1;
 
-            // Percorre os módulos na mesmíssima ordem que o menu foi desenhado
             for (ModuloEmpresa modulo : empresa.getModulosAtivos()) {
                 if (modulo.getAtivo()) {
-                    // Se o contador bateu com o número que o cliente digitou, achamos a ação!
                     if (contador == numero) {
-                        return modulo.getCodigoAcao(); // Ex: Retorna "PESQUISAR_DATA" ou "VER_FOTOS"
+                        return modulo.getCodigoAcao();
                     }
                     contador++;
                 }
             }
-            return "OPCAO_INVALIDA"; // Digitou um número maior do que as opções disponíveis
+            return "OPCAO_INVALIDA";
 
         } catch (NumberFormatException e) {
-            return "OPCAO_INVALIDA"; // Digitou uma letra em vez de número
+            return "OPCAO_INVALIDA";
         }
     }
 }
