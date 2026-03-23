@@ -5,7 +5,7 @@ import com.example.demo.repository.EmpresaRepository;
 import com.example.demo.servico.GerenciadorSessao;
 import com.example.demo.servico.observador.Observadorwhatsapp;
 import com.example.demo.strategy.FactoryModulo;
-import com.example.demo.servico.ServicoWppConnect;
+import com.example.demo.util.WebhookHandler;
 import com.example.demo.strategy.ModuloAtendimentoStrategy;
 import com.example.demo.util.WhatsappUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +28,14 @@ public class ControllerWhatsapp {
 
     @PostMapping("/whatsapp")
     public ResponseEntity<Void> receberMensagem(@RequestBody Map<String, Object> payload) {
+
         String sessao = (String) payload.get("session");
-        String rawFrom = (String) payload.get("from");
         String tipoMensagem = (String) payload.get("type");
-        String textoRecebido = (String) payload.get("body");
+
+        // 2. Instanciamos o seu utilitário para mergulhar no JSON e pegar os dados com segurança
+        WebhookHandler handler = new WebhookHandler(payload);
+        String rawFrom = handler.getRemoteJid();
+        String textoRecebido = handler.getTextoMensagem();
 
         try {
             // 🛑 TRAVA ANTI-X9 (Recuperada e Protegida)

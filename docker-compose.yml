@@ -47,9 +47,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=${MEU_POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${MEU_POSTGRES_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - WPPCONNECT_URL=http://wppconnect:21465
+      - WPPCONNECT_SECRET_KEY=${WPP_SECRET_KEY}
     networks:
       - bot-network
-
 
 networks:
   bot-network:

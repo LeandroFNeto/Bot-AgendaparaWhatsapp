@@ -38,7 +38,7 @@ public class ServicoMensagem {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", "Bearer " + wppConnectService.obterToken());
+            headers.set("Authorization", "Bearer " + wppConnectService.obterToken(sessao));
 
             Map<String, Object> body = new HashMap<>();
             body.put("phone", numeroLimpo); // 👈 Enviamos o número limpo
