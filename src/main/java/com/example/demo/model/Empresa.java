@@ -15,6 +15,8 @@ public class Empresa {
 
     private String nome;
 
+    private Boolean usaIA = false;
+
     @Column(unique = true)
     private String sessaoWhatsapp;
 
@@ -49,7 +51,13 @@ public class Empresa {
     @OrderBy("ordemExibicao ASC") // O banco já traz ordenado!
     private List<ModuloEmpresa> modulosAtivos;
 
+    public Boolean getUsaIA() {
+        return usaIA;
+    }
 
+    public void setUsaIA(Boolean usaIA) {
+        this.usaIA = usaIA;
+    }
 
     public Boolean getLocacaoPorHora() {
         return locacaoPorHora;

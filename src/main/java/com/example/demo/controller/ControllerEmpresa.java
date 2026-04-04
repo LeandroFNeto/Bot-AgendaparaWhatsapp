@@ -46,6 +46,16 @@ public class ControllerEmpresa {
             return ResponseEntity.badRequest().body("❌ Erro: Já existe uma empresa com esta sessão. Use o método PUT para atualizar.");
         }
 
+        // 🚀 O SEGREDO DOS MÓDULOS: Avisar para cada Módulo quem é a Empresa dona dele
+        if (novaEmpresa.getModulosAtivos() != null) {
+            novaEmpresa.getModulosAtivos().forEach(modulo -> modulo.setEmpresa(novaEmpresa));
+        }
+
+        // 🚀 O SEGREDO DOS DIAS DE RESERVA: Mesmo processo
+        if (novaEmpresa.getDiasDeReserva() != null) {
+            novaEmpresa.getDiasDeReserva().forEach(dia -> dia.setEmpresa(novaEmpresa));
+        }
+
         empresaRepository.save(novaEmpresa);
         return ResponseEntity.status(HttpStatus.CREATED).body("✅ Nova empresa '" + novaEmpresa.getNome() + "' cadastrada e pronta para uso!");
     }
@@ -82,6 +92,18 @@ public class ControllerEmpresa {
         if (dadosAtualizados.getGoogleCalendarId() != null) empresaExistente.setGoogleCalendarId(dadosAtualizados.getGoogleCalendarId());
         // Se a empresa mudou a regra de locação, atualiza também
         if (dadosAtualizados.getLocacaoPorHora() != null) empresaExistente.setLocacaoPorHora(dadosAtualizados.getLocacaoPorHora());
+        // 🚀 SE VOCÊ CRIOU A VARIÁVEL DE IA, ELA ENTRA AQUI TAMBÉM:
+        // if (dadosAtualizados.getUsaIA() != null) empresaExistente.setUsaIA(dadosAtualizados.getUsaIA());
+
+        // 🚀 ATUALIZAR OS MÓDULOS NA EDIÇÃO
+        if (dadosAtualizados.getModulosAtivos() != null) {
+            // Limpa a lista antiga e coloca os módulos novos
+            empresaExistente.getModulosAtivos().clear();
+            dadosAtualizados.getModulosAtivos().forEach(modulo -> {
+                modulo.setEmpresa(empresaExistente);
+                empresaExistente.getModulosAtivos().add(modulo);
+            });
+        }
 
         empresaRepository.save(empresaExistente);
         return ResponseEntity.ok("✅ Configurações de '" + empresaExistente.getNome() + "' atualizadas com sucesso!");
