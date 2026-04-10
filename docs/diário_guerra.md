@@ -111,54 +111,195 @@ Para exemplificar a refatoração pesada aplicada na Fase 4, este diagrama detal
 
 ```mermaid
 classDiagram
-    class ControllerWhatsapp {
-        +receberWebhook(payload)
-    }
-    
-    class Empresa {
-        +Long id
-        +String nome
-        +String ramoAtuacao
-        +String telefone
+    class WebhookHandler {
+        - payload : Map~String,Object~
+        + WebhookHandler(payload : Map~String,Object~)
+        + getRemoteJid() : String
+        + getTextoMensagem() : String
     }
 
-    class ModuloFactory {
-        +obterEstrategia(ramoAtuacao) ModuloAtendimentoStrategy
+    class DiaReservaDTO {
+        + data : String
+        + diaDaSemana : String
+        + status : String
     }
 
-    class ModuloAtendimentoStrategy {
-        <<interface>>
-        +processarMensagem(empresa, cliente, texto)
-        +getRamoDeAtuacao() String
+    class EstadoUsuario {
+        - fase : String
+        - ultimaInteracao : long
+        + EstadoUsuario(fase : String, ultimaInteracao : long)
+        + getFase() : String
+        + getUltimaInteracao() : long
+    }
+
+    class ServicoMenu {
+        + montarMenuPrincipal(empresa : Empresa) : String
+        + descobrirAcao(empresa : Empresa, numeroDigitado : String) : String
+    }
+
+    class GerenciadorSessao {
+        - TEMPO_EXPIRACAO_MS : long = 10*60*1000
+        + obterEstadoAtual(numeroCliente : String) : String
+        + atualizarEstado(numeroCliente : String, novaFase : String) : void
     }
 
     class LocacaoStrategy {
-        +processarMensagem()
-        +getRamoDeAtuacao()
+        + getRamoDeAtuacao() : String
+        + processarMensagem(empresa : Empresa, numeroCliente : String, textoRecebido : String, estadoAtual : String) : void
     }
 
-    class BarbeariaStrategy {
-        +processarMensagem()
-        +getRamoDeAtuacao()
+    class FactoryModulo {
+        + FactoryModulo(listaDeEstrategias : List~ModuloAtendimentoStrategy~)
+        + obterEstrategia(ramo : String) : ModuloAtendimentoStrategy
     }
 
-    class ServicoGoogleAgenda {
-        +consultarDisponibilidade()
-        +bloquearData()
+    class ControllerWhatsapp {
+        + receberMensagem(payload : Map~String,Object~) : ResponseEntity~Void~
     }
 
-    class MensageriaService {
-        +enviarMensagemWPPConnect()
+    class ControllerEmpresa {
+        - adminApiKey : String
+        - isAcessoNegado(tokenRecebido : String) : boolean
+        + cadastrarEmpresa(token : String, novaEmpresa : Empresa) : ResponseEntity~String~
+        + atualizarEmpresa(token : String, dadosAtualizados : Empresa) : ResponseEntity~String~
     }
 
-    %% Relações de Dependência e Herança
-    ControllerWhatsapp --> Empresa : Identifica o Cliente
-    ControllerWhatsapp --> ModuloFactory : Solicita a Estratégia
-    ModuloFactory ..> ModuloAtendimentoStrategy : Instancia
+    class MensagemWhatsappDTO {
+        + numero : String
+        + nome : String
+        + texto : String
+    }
+
+    class ServicoGoogleagenda {
+        + inicializarAgenda() : void
+        + conectarAgenda() : Calendar
+    }
+
+    class ServicoReserva {
+        + agendarNoGoogle(empresa : Empresa, dataReserva : String, nomeCliente : String) : void
+        + listarReservas(empresa : Empresa) : List~DiaReservaDTO~
+        + pesquisarData(empresa : Empresa, dataRecebida : String) : DiaReservaDTO
+    }
+
+    class ObservadorGoogleAgenda {
+        + registrarNoGoogle(evento : EventoReservaConfirmada) : void
+    }
+
+    class HorarioReserva {
+        - id : Long
+        - descricao : String
+        - status : String
+        - valor : String
+        + getId() : Long
+        + setId(id : Long) : void
+        + getDescricao() : String
+        + setDescricao(descricao : String) : void
+        + getStatus() : String
+        + setStatus(status : String) : void
+        + getDia() : DiaReserva
+        + setDia(dia : DiaReserva) : void
+        + getValor() : String
+        + setValor(valor : String) : void
+    }
+
+    class DiaReserva {
+        - id : Long
+        - data : String
+        + getId() : Long
+        + setId(id : Long) : void
+        + getData() : String
+        + setData(data : String) : void
+        + getEmpresa() : Empresa
+        + setEmpresa(empresa : Empresa) : void
+        + getHorariosDisponiveis() : List~HorarioReserva~
+        + setHorariosDisponiveis(horariosDisponiveis : List~HorarioReserva~) : void
+    }
+
+    class Empresa {
+        - id : Long
+        - nome : String
+        - usaIA : Boolean = false
+        - sessaoWhatsapp : String
+        - mensagemSaudacao : String
+        - ramoDeAtuacao : String
+        - tabelaDePrecos : String
+        - linkGoogleMaps : String
+        - linkFotoPrincipal : String
+        - linkGaleria : String
+        - googleCalendarId : String
+        - locacaoPorHora : Boolean = false
+        + getUsaIA() : Boolean
+        + setUsaIA(usaIA : Boolean) : void
+        + getLocacaoPorHora() : Boolean
+        + setLocacaoPorHora(locacaoPorHora : Boolean) : void
+        + getModulosAtivos() : List~ModuloEmpresa~
+        + setModulosAtivos(modulosAtivos : List~ModuloEmpresa~) : void
+        + getGoogleCalendarId() : String
+        + setGoogleCalendarId(googleCalendarId : String) : void
+        + getNome() : String
+        + setNome(nome : String) : void
+        + getId() : Long
+        + setId(id : Long) : void
+        + getMensagemSaudacao() : String
+        + setMensagemSaudacao(mensagemSaudacao : String) : void
+        + getSessaoWhatsapp() : String
+        + setSessaoWhatsapp(sessaoWhatsapp : String) : void
+        + getRamoDeAtuacao() : String
+        + setRamoDeAtuacao(ramoDeAtuacao : String) : void
+        + getDiasDeReserva() : List~DiaReserva~
+        + getTabelaDePrecos() : String
+        + setTabelaDePrecos(tabelaDePrecos : String) : void
+        + setDiasDeReserva(diasDeReserva : List~DiaReserva~) : void
+        + getLinkGoogleMaps() : String
+        + setLinkGoogleMaps(linkGoogleMaps : String) : void
+        + getLinkFotoPrincipal() : String
+        + setLinkFotoPrincipal(linkFotoPrincipal : String) : void
+        + getLinkGaleria() : String
+        + setLinkGaleria(linkGaleria : String) : void
+    }
+
+    class ModuloEmpresa {
+        - id : Long
+        - codigoAcao : String
+        - textoMenu : String
+        - ordemExibicao : Integer
+        - ativo : Boolean = true
+        + getId() : Long
+        + setId(id : Long) : void
+        + getEmpresa() : Empresa
+        + setEmpresa(empresa : Empresa) : void
+        + getCodigoAcao() : String
+        + setCodigoAcao(codigoAcao : String) : void
+        + getTextoMenu() : String
+        + setTextoMenu(textoMenu : String) : void
+        + getOrdemExibicao() : Integer
+        + setOrdemExibicao(ordemExibicao : Integer) : void
+        + getAtivo() : Boolean
+        + setAtivo(ativo : Boolean) : void
+    }
+
+    %% Relacionamentos de Serviços e Controladores
+    ControllerWhatsapp --> GerenciadorSessao : - gerenciadorSessao
+    ControllerWhatsapp --> FactoryModulo : - moduloFactory
+    GerenciadorSessao --> EstadoUsuario : - sessoes [key: String]
     
-    ModuloAtendimentoStrategy <|-- LocacaoStrategy : Implementa
-    ModuloAtendimentoStrategy <|-- BarbeariaStrategy : Implementa
+    LocacaoStrategy --> ServicoMenu : - servicoMenu
+    LocacaoStrategy --> GerenciadorSessao : - gerenciadorSessao
+    LocacaoStrategy --> ServicoReserva : - servicoReserva
     
-    LocacaoStrategy --> ServicoGoogleAgenda : Bloqueia / Consulta
-    LocacaoStrategy --> MensageriaService : Responde ao Cliente
-    BarbeariaStrategy --> MensageriaService : Responde ao Cliente
+    ServicoReserva --> ServicoGoogleagenda : - agendaService
+    
+    %% Relacionamento que aparece cortado na parte 4 a partir do ObservadorGoogleAgenda
+    ObservadorGoogleAgenda --> ServicoMensagem : - servicoMensagem
+
+    %% Relacionamentos de Entidades (Bidirecionais explícitos no diagrama original)
+    DiaReserva "1" --> "*" HorarioReserva : - horariosDisponiveis {ordered}
+    HorarioReserva --> "1" DiaReserva : - dia
+
+    Empresa "1" --> "*" DiaReserva : - diasDeReserva {ordered}
+    DiaReserva --> "1" Empresa : - empresa
+
+    Empresa "1" --> "*" ModuloEmpresa : - modulosAtivos {ordered}
+    ModuloEmpresa --> "1" Empresa : - empresa
+
+````
