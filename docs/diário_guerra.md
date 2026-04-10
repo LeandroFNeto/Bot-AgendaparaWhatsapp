@@ -281,24 +281,23 @@ classDiagram
     %% Relacionamentos de Serviços e Controladores
     ControllerWhatsapp --> GerenciadorSessao : - gerenciadorSessao
     ControllerWhatsapp --> FactoryModulo : - moduloFactory
-    GerenciadorSessao --> EstadoUsuario : - sessoes [key: String]
+    GerenciadorSessao --> EstadoUsuario : - sessoes
     
     LocacaoStrategy --> ServicoMenu : - servicoMenu
     LocacaoStrategy --> GerenciadorSessao : - gerenciadorSessao
     LocacaoStrategy --> ServicoReserva : - servicoReserva
     
     ServicoReserva --> ServicoGoogleagenda : - agendaService
-    
-    %% Relacionamento que aparece cortado na parte 4 a partir do ObservadorGoogleAgenda
     ObservadorGoogleAgenda --> ServicoMensagem : - servicoMensagem
 
-    %% Relacionamentos de Entidades (Bidirecionais explícitos no diagrama original)
-    DiaReserva "1" --> "*" HorarioReserva : - horariosDisponiveis {ordered}
+    %% Relacionamentos de Entidades (Bidirecionais explícitos e limpos)
+    DiaReserva "1" --> "*" HorarioReserva : - horariosDisponiveis
     HorarioReserva --> "1" DiaReserva : - dia
 
-    Empresa "1" --> "*" DiaReserva : - diasDeReserva {ordered}
+    Empresa "1" --> "*" DiaReserva : - diasDeReserva
     DiaReserva --> "1" Empresa : - empresa
 
-    Empresa "1" --> "*" ModuloEmpresa : - modulosAtivos {ordered}
+    Empresa "1" --> "*" ModuloEmpresa : - modulosAtivos
     ModuloEmpresa --> "1" Empresa : - empresa
 
+````
