@@ -302,4 +302,3 @@ classDiagram
     Empresa "1" --> "*" ModuloEmpresa : - modulosAtivos {ordered}
     ModuloEmpresa --> "1" Empresa : - empresa
 
-````
