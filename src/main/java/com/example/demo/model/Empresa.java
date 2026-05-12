@@ -44,6 +44,8 @@ public class Empresa {
     @Column(name = "google_calendar_id")
     private String googleCalendarId;
 
+
+
     @Column(name = "locacao_por_hora")
     private Boolean locacaoPorHora = false;
 

@@ -49,10 +49,13 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - WPPCONNECT_URL=http://wppconnect:21465
       - WPPCONNECT_SECRET_KEY=${WPP_SECRET_KEY}
+      # 👇 AS VARIÁVEIS NOVAS INJETADAS AQUI! 👇
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - API_AUTH_TOKEN=${API_AUTH_TOKEN}
     networks:
       - bot-network
 
 networks:
   bot-network:
     driver: bridge
-

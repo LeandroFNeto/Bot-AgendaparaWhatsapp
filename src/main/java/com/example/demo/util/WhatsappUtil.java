@@ -1,5 +1,8 @@
 package com.example.demo.util;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class WhatsappUtil {
     /**
      * Limpa o JID e retorna apenas os números.
