@@ -1,0 +1,18 @@
+get:
+  tags:
+  - empresa-search-controller
+  operationId: executeSearch-empresa-get
+  parameters:
+  - name: sessaoWhatsapp
+    in: query
+    schema:
+      type: string
+  responses:
+    "200":
+      description: OK
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/EntityModelEmpresa"
+    "404":
+      description: Not Found

@@ -1,10 +1,17 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.empresa.*;
+import com.example.demo.dto.empresa.EmpresaCreateDTO;
+import com.example.demo.dto.empresa.EmpresaResponseDTO;
+import com.example.demo.dto.empresa.EmpresaUpdateAdminDTO;
+import com.example.demo.dto.empresa.EmpresaUpdateDTO;
 import com.example.demo.model.Empresa;
 import com.example.demo.repository.EmpresaRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +19,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/empresas")
-@Tag(name = "Gerenciamento de Empresas", description = "Endpoints para Criação, Clientes e Administradores do SaaS")
+@Tag(name = "Gerenciamento de Empresas", description = "Cadastro e atualização de empresas do SaaS, isolados por intenção (criação, cliente e admin)")
 public class ControllerEmpresa {
 
     @Autowired private EmpresaRepository empresaRepository;
@@ -25,48 +35,55 @@ public class ControllerEmpresa {
         return token == null || !token.equals(adminApiKey);
     }
 
-    // ========================================================================
-    // 🚪 PORTA 0: CADASTRAR NOVA EMPRESA (POST)
-    // ========================================================================
     @PostMapping
-    @Operation(summary = "Criar novo cliente SaaS", description = "Cadastra uma empresa e define sua sessão única de WhatsApp.")
-    @ApiResponse(responseCode = "201", description = "Empresa criada com sucesso")
-    public ResponseEntity<?> cadastrar(@RequestHeader(value = "x-admin-token", required = false) String token,
-                                       @Valid @RequestBody EmpresaCreateDTO dto) {
+    @Operation(summary = "Criar novo cliente SaaS", description = "Cadastra uma empresa a partir de EmpresaCreateDTO e devolve EmpresaResponseDTO, sem expor a entidade JPA.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Empresa criada com sucesso",
+                    content = @Content(schema = @Schema(implementation = EmpresaResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Sessão WhatsApp já ocupada"),
+            @ApiResponse(responseCode = "401", description = "Token administrativo inválido")
+    })
+    public ResponseEntity<EmpresaResponseDTO> cadastrar(
+            @Parameter(description = "Token administrativo do SaaS", example = "sua-chave-admin")
+            @RequestHeader(value = "x-admin-token", required = false) String token,
+            @Valid @RequestBody EmpresaCreateDTO dto) {
 
-        if (isAcessoNegado(token)) return ResponseEntity.status(401).body("Token Inválido");
-
-        if (empresaRepository.findBySessaoWhatsapp(dto.sessaoWhatsapp()) != null) {
-            return ResponseEntity.badRequest().body("Sessão já ocupada");
+        if (isAcessoNegado(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token Inválido");
         }
 
-        // Converte DTO para Entity
+        if (empresaRepository.findBySessaoWhatsapp(dto.sessaoWhatsapp()) != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sessão já ocupada");
+        }
+
         Empresa empresa = new Empresa();
         empresa.setNome(dto.nome());
         empresa.setSessaoWhatsapp(dto.sessaoWhatsapp());
         empresa.setRamoDeAtuacao(dto.ramoDeAtuacao());
 
         Empresa salva = empresaRepository.save(empresa);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(new EmpresaResponseDTO(
-                salva.getId(), salva.getNome(), salva.getSessaoWhatsapp(), "DISCONNECTED", null, java.time.LocalDateTime.now()
-        ));
+        return ResponseEntity.status(HttpStatus.CREATED).body(paraResposta(salva));
     }
 
-    // ========================================================================
-    // 🚪 PORTA 1: PAINEL DO CLIENTE (PUT) - O dono do Recanto usa essa
-    // ========================================================================
     @PutMapping("/{sessao}/cliente")
-    @Operation(summary = "Atualização pelo Cliente", description = "Altera textos, links e aparências. Não altera cobrança.")
-    public ResponseEntity<String> atualizarPeloCliente(
+    @Operation(summary = "Atualizar perfil pelo cliente", description = "Aplica EmpresaUpdateDTO: textos, links e aparência. Não altera cobrança nem infraestrutura.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Perfil do cliente atualizado",
+                    content = @Content(schema = @Schema(implementation = EmpresaResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Empresa não encontrada para a sessão informada")
+    })
+    public ResponseEntity<EmpresaResponseDTO> atualizarPeloCliente(
+            @Parameter(description = "Token do painel do cliente")
             @RequestHeader(value = "x-cliente-token", required = false) String token,
+            @Parameter(description = "Identificador da sessão WhatsApp da empresa", example = "sessao_recanto_01")
             @PathVariable String sessao,
-            @RequestBody EmpresaUpdateClienteDTO dto) {
+            @Valid @RequestBody EmpresaUpdateDTO dto) {
 
         Empresa empresa = empresaRepository.findBySessaoWhatsapp(sessao);
-        if (empresa == null) return ResponseEntity.notFound().build();
+        if (empresa == null) {
+            return ResponseEntity.notFound().build();
+        }
 
-        // Atualiza apenas os campos estéticos/básicos
         if (dto.nome() != null) empresa.setNome(dto.nome());
         if (dto.mensagemSaudacao() != null) empresa.setMensagemSaudacao(dto.mensagemSaudacao());
         if (dto.tabelaDePrecos() != null) empresa.setTabelaDePrecos(dto.tabelaDePrecos());
@@ -74,30 +91,47 @@ public class ControllerEmpresa {
         if (dto.linkFotoPrincipal() != null) empresa.setLinkFotoPrincipal(dto.linkFotoPrincipal());
         if (dto.linkGaleria() != null) empresa.setLinkGaleria(dto.linkGaleria());
 
-        empresaRepository.save(empresa);
-        return ResponseEntity.ok("✅ Perfil do cliente atualizado com sucesso!");
+        return ResponseEntity.ok(paraResposta(empresaRepository.save(empresa)));
     }
 
-    // ========================================================================
-    // 🚪 PORTA 2: PAINEL DO ADMIN (PUT) - Você, o dono do SaaS, usa essa
-    // ========================================================================
     @PutMapping("/{sessao}/admin")
-    @Operation(summary = "Atualização pelo Admin (SaaS)", description = "Altera infraestrutura, IA e módulos de pagamento.")
-    public ResponseEntity<String> atualizarPeloAdmin(
+    @Operation(summary = "Atualizar infraestrutura pelo admin", description = "Aplica EmpresaUpdateAdminDTO: sessão, tipo de locação e módulos. Uso restrito ao administrador do SaaS.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Infraestrutura atualizada",
+                    content = @Content(schema = @Schema(implementation = EmpresaResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Token administrativo inválido"),
+            @ApiResponse(responseCode = "404", description = "Empresa não encontrada para a sessão informada")
+    })
+    public ResponseEntity<EmpresaResponseDTO> atualizarPeloAdmin(
+            @Parameter(description = "Token administrativo do SaaS", example = "sua-chave-admin")
             @RequestHeader(value = "x-admin-token", required = false) String token,
+            @Parameter(description = "Identificador da sessão WhatsApp da empresa", example = "sessao_recanto_01")
             @PathVariable String sessao,
-            @RequestBody EmpresaUpdateAdminDTO dto) {
+            @Valid @RequestBody EmpresaUpdateAdminDTO dto) {
 
-        if (isAcessoNegado(token)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("❌ Acesso negado");
+        if (isAcessoNegado(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Acesso negado");
+        }
 
         Empresa empresa = empresaRepository.findBySessaoWhatsapp(sessao);
-        if (empresa == null) return ResponseEntity.notFound().build();
+        if (empresa == null) {
+            return ResponseEntity.notFound().build();
+        }
 
-        // Atualiza campos sensíveis de negócio
         if (dto.sessaoWhatsapp() != null) empresa.setSessaoWhatsapp(dto.sessaoWhatsapp());
         if (dto.locacaoPorHora() != null) empresa.setLocacaoPorHora(dto.locacaoPorHora());
 
-        empresaRepository.save(empresa);
-        return ResponseEntity.ok("✅ Infraestrutura da empresa atualizada com sucesso pelo Admin!");
+        return ResponseEntity.ok(paraResposta(empresaRepository.save(empresa)));
+    }
+
+    private EmpresaResponseDTO paraResposta(Empresa empresa) {
+        return new EmpresaResponseDTO(
+                empresa.getId(),
+                empresa.getNome(),
+                empresa.getSessaoWhatsapp(),
+                "DISCONNECTED",
+                empresa.getLinkGoogleMaps(),
+                LocalDateTime.now()
+        );
     }
 }

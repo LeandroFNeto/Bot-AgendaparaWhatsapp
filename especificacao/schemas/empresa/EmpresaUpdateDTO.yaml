@@ -1,0 +1,27 @@
+type: object
+description: Contrato de atualização do painel do cliente (PUT). Não inclui campos de cobrança ou infraestrutura.
+properties:
+  nome:
+    type: string
+    description: Nome fantasia
+    example: Recanto Vista Alegre
+  mensagemSaudacao:
+    type: string
+    description: Mensagem que o bot envia ao iniciar a conversa
+    example: Olá! Como posso ajudar?
+  tabelaDePrecos:
+    type: string
+    description: Tabela de preços em texto para o bot ler
+    example: "Diária padrão: R$ 500,00"
+  linkGoogleMaps:
+    type: string
+    description: Link do Google Maps do estabelecimento
+    example: https://maps.app.goo.gl/exemplo
+  linkFotoPrincipal:
+    type: string
+    description: URL da foto principal exibida no painel
+    example: https://meusite.com/foto.jpg
+  linkGaleria:
+    type: string
+    description: "Link da galeria, Instagram ou portfólio"
+    example: https://instagram.com/recanto

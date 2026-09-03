@@ -1,0 +1,82 @@
+# Fonte Única de Verdade (contract-first), fatiada em especificacao/.
+# Edite os arquivos da pasta; este arquivo só monta o documento OpenAPI.
+# O código Java só é criado ou modificado para satisfazer este contrato.
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Gerenciamento de Empresas
+  description: Cadastro e atualização de empresas do SaaS, isolados por intenção (criação, cliente e admin)
+- name: Webhook WhatsApp
+  description: Recepção tipada de eventos do WPPConnect
+paths:
+  /empresas:
+    $ref: './especificacao/paths/empresas.yaml'
+  /empresas/search/findBySessaoWhatsapp:
+    $ref: './especificacao/paths/empresas-search.yaml'
+  /empresas/{id}:
+    $ref: './especificacao/paths/empresas-id.yaml'
+  /profile:
+    $ref: './especificacao/paths/profile.yaml'
+  /profile/empresas:
+    $ref: './especificacao/paths/profile-empresas.yaml'
+  /empresas/{sessao}/cliente:
+    $ref: './especificacao/paths/empresas-cliente.yaml'
+  /empresas/{sessao}/admin:
+    $ref: './especificacao/paths/empresas-admin.yaml'
+  /webhook/whatsapp:
+    $ref: './especificacao/paths/webhook-whatsapp.yaml'
+components:
+  schemas:
+    EmpresaCreateDTO:
+      $ref: './especificacao/schemas/empresa/EmpresaCreateDTO.yaml'
+    EmpresaUpdateDTO:
+      $ref: './especificacao/schemas/empresa/EmpresaUpdateDTO.yaml'
+    EmpresaUpdateAdminDTO:
+      $ref: './especificacao/schemas/empresa/EmpresaUpdateAdminDTO.yaml'
+    EmpresaResponseDTO:
+      $ref: './especificacao/schemas/empresa/EmpresaResponseDTO.yaml'
+    WhatsappWebhookDTO:
+      $ref: './especificacao/schemas/webhook/WhatsappWebhookDTO.yaml'
+    ChaveMensagem:
+      $ref: './especificacao/schemas/webhook/ChaveMensagem.yaml'
+    ConteudoMensagem:
+      $ref: './especificacao/schemas/webhook/ConteudoMensagem.yaml'
+    DadosWebhook:
+      $ref: './especificacao/schemas/webhook/DadosWebhook.yaml'
+    IdentificadorMensagem:
+      $ref: './especificacao/schemas/webhook/IdentificadorMensagem.yaml'
+    MensagemAninhada:
+      $ref: './especificacao/schemas/webhook/MensagemAninhada.yaml'
+    AbstractJsonSchemaPropertyObject:
+      $ref: './especificacao/schemas/data-rest/hal.yaml#/AbstractJsonSchemaPropertyObject'
+    Item:
+      $ref: './especificacao/schemas/data-rest/hal.yaml#/Item'
+    JsonSchema:
+      $ref: './especificacao/schemas/data-rest/hal.yaml#/JsonSchema'
+    RepresentationModelObject:
+      $ref: './especificacao/schemas/data-rest/hal.yaml#/RepresentationModelObject'
+    PageMetadata:
+      $ref: './especificacao/schemas/data-rest/hal.yaml#/PageMetadata'
+    Link:
+      $ref: './especificacao/schemas/data-rest/hal.yaml#/Link'
+    Links:
+      $ref: './especificacao/schemas/data-rest/hal.yaml#/Links'
+    DiaReserva:
+      $ref: './especificacao/schemas/data-rest/entidades.yaml#/DiaReserva'
+    Empresa:
+      $ref: './especificacao/schemas/data-rest/entidades.yaml#/Empresa'
+    EntityModelEmpresa:
+      $ref: './especificacao/schemas/data-rest/entidades.yaml#/EntityModelEmpresa'
+    HorarioReserva:
+      $ref: './especificacao/schemas/data-rest/entidades.yaml#/HorarioReserva'
+    ModuloEmpresa:
+      $ref: './especificacao/schemas/data-rest/entidades.yaml#/ModuloEmpresa'
+    PagedModelEntityModelEmpresa:
+      $ref: './especificacao/schemas/data-rest/entidades.yaml#/PagedModelEntityModelEmpresa'
+    EmpresaRequestBody:
+      $ref: './especificacao/schemas/data-rest/entidades.yaml#/EmpresaRequestBody'

@@ -1,0 +1,166 @@
+DiaReserva:
+  type: object
+  properties:
+    id:
+      type: integer
+      format: int64
+    data:
+      type: string
+    empresa:
+      $ref: "#/components/schemas/Empresa"
+    horariosDisponiveis:
+      type: array
+      items:
+        $ref: "#/components/schemas/HorarioReserva"
+Empresa:
+  type: object
+  properties:
+    id:
+      type: integer
+      format: int64
+    nome:
+      type: string
+    usaIA:
+      type: boolean
+    sessaoWhatsapp:
+      type: string
+    mensagemSaudacao:
+      type: string
+    ramoDeAtuacao:
+      type: string
+    tabelaDePrecos:
+      type: string
+    diasDeReserva:
+      type: array
+      items:
+        $ref: "#/components/schemas/DiaReserva"
+    linkGoogleMaps:
+      type: string
+    linkFotoPrincipal:
+      type: string
+    linkGaleria:
+      type: string
+    googleCalendarId:
+      type: string
+    locacaoPorHora:
+      type: boolean
+    modulosAtivos:
+      type: array
+      items:
+        $ref: "#/components/schemas/ModuloEmpresa"
+EntityModelEmpresa:
+  type: object
+  properties:
+    nome:
+      type: string
+    usaIA:
+      type: boolean
+    sessaoWhatsapp:
+      type: string
+    mensagemSaudacao:
+      type: string
+    ramoDeAtuacao:
+      type: string
+    tabelaDePrecos:
+      type: string
+    diasDeReserva:
+      type: array
+      items:
+        $ref: "#/components/schemas/DiaReserva"
+    linkGoogleMaps:
+      type: string
+    linkFotoPrincipal:
+      type: string
+    linkGaleria:
+      type: string
+    googleCalendarId:
+      type: string
+    locacaoPorHora:
+      type: boolean
+    modulosAtivos:
+      type: array
+      items:
+        $ref: "#/components/schemas/ModuloEmpresa"
+    _links:
+      $ref: "#/components/schemas/Links"
+HorarioReserva:
+  type: object
+  properties:
+    id:
+      type: integer
+      format: int64
+    descricao:
+      type: string
+    status:
+      type: string
+    valor:
+      type: string
+    dia:
+      $ref: "#/components/schemas/DiaReserva"
+ModuloEmpresa:
+  type: object
+  properties:
+    id:
+      type: integer
+      format: int64
+    empresa:
+      $ref: "#/components/schemas/Empresa"
+    codigoAcao:
+      type: string
+    textoMenu:
+      type: string
+    ordemExibicao:
+      type: integer
+      format: int32
+    ativo:
+      type: boolean
+PagedModelEntityModelEmpresa:
+  type: object
+  properties:
+    _embedded:
+      type: object
+      properties:
+        empresas:
+          type: array
+          items:
+            $ref: "#/components/schemas/EntityModelEmpresa"
+    _links:
+      $ref: "#/components/schemas/Links"
+    page:
+      $ref: "#/components/schemas/PageMetadata"
+EmpresaRequestBody:
+  type: object
+  properties:
+    id:
+      type: integer
+      format: int64
+    nome:
+      type: string
+    usaIA:
+      type: boolean
+    sessaoWhatsapp:
+      type: string
+    mensagemSaudacao:
+      type: string
+    ramoDeAtuacao:
+      type: string
+    tabelaDePrecos:
+      type: string
+    diasDeReserva:
+      type: array
+      items:
+        $ref: "#/components/schemas/DiaReserva"
+    linkGoogleMaps:
+      type: string
+    linkFotoPrincipal:
+      type: string
+    linkGaleria:
+      type: string
+    googleCalendarId:
+      type: string
+    locacaoPorHora:
+      type: boolean
+    modulosAtivos:
+      type: array
+      items:
+        $ref: "#/components/schemas/ModuloEmpresa"

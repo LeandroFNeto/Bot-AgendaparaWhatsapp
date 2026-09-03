@@ -1,0 +1,29 @@
+type: object
+description: Contrato de saída da API de empresas. Não expõe a entidade JPA nem campos internos de infraestrutura.
+properties:
+  id:
+    type: integer
+    format: int64
+    description: Identificador único da empresa
+    example: 1
+  nome:
+    type: string
+    description: Nome fantasia
+    example: Recanto Vista Alegre
+  sessaoWhatsapp:
+    type: string
+    description: Identificador da sessão no WPPConnect, usado pelo front-end para acompanhar a conexão
+    example: sessao_recanto_01
+  statusSessao:
+    type: string
+    description: Status atual da sessão WhatsApp
+    example: DISCONNECTED
+  linkGoogleMaps:
+    type: string
+    description: Link configurado para o Google Maps
+    example: https://maps.app.goo.gl/exemplo
+  atualizadoEm:
+    type: string
+    format: date-time
+    description: Data e hora da última modificação retornada pela API
+    example: 2026-09-03T14:30:00

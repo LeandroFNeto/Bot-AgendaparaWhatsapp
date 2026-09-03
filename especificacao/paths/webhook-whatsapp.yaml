@@ -1,0 +1,15 @@
+post:
+  tags:
+  - Webhook WhatsApp
+  summary: Receber mensagem do WhatsApp
+  description: Consome WhatsappWebhookDTO (sem Map genérico). Aplica travas Anti-X9, ignora grupos/status e encaminha o texto ao módulo da empresa.
+  operationId: receberMensagem
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/WhatsappWebhookDTO"
+    required: true
+  responses:
+    "200":
+      description: Evento aceito. Mensagens filtradas também retornam 200 para o WPPConnect não reenviar.

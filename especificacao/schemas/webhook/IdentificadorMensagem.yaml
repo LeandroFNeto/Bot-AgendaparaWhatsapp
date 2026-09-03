@@ -1,0 +1,11 @@
+type: object
+description: Identificador da mensagem no provedor
+properties:
+  fromMe:
+    type: boolean
+    description: Indica se a mensagem partiu do próprio número conectado
+    example: false
+  remoteJid:
+    type: string
+    description: JID associado ao identificador
+    example: 5511999999999@c.us

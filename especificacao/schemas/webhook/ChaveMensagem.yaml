@@ -1,0 +1,11 @@
+type: object
+description: Chave da mensagem no formato Baileys
+properties:
+  remoteJid:
+    type: string
+    description: JID do remetente
+    example: 5511999999999@c.us
+  fromMe:
+    type: boolean
+    description: Indica se a mensagem foi enviada pelo dono do bot
+    example: false

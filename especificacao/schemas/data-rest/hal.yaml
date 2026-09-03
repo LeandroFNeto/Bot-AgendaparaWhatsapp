@@ -1,0 +1,86 @@
+AbstractJsonSchemaPropertyObject:
+  type: object
+  properties:
+    title:
+      type: string
+    readOnly:
+      type: boolean
+Item:
+  type: object
+  properties:
+    type:
+      type: string
+    properties:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/AbstractJsonSchemaPropertyObject"
+    requiredProperties:
+      type: array
+      items:
+        type: string
+JsonSchema:
+  type: object
+  properties:
+    title:
+      type: string
+    description:
+      type: string
+    properties:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/AbstractJsonSchemaPropertyObject"
+    requiredProperties:
+      type: array
+      items:
+        type: string
+    definitions:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/Item"
+    type:
+      type: string
+    $schema:
+      type: string
+RepresentationModelObject:
+  type: object
+  properties:
+    _links:
+      $ref: "#/components/schemas/Links"
+PageMetadata:
+  type: object
+  properties:
+    size:
+      type: integer
+      format: int64
+    totalElements:
+      type: integer
+      format: int64
+    totalPages:
+      type: integer
+      format: int64
+    number:
+      type: integer
+      format: int64
+Link:
+  type: object
+  properties:
+    href:
+      type: string
+    hreflang:
+      type: string
+    title:
+      type: string
+    type:
+      type: string
+    deprecation:
+      type: string
+    profile:
+      type: string
+    name:
+      type: string
+    templated:
+      type: boolean
+Links:
+  type: object
+  additionalProperties:
+    $ref: "#/components/schemas/Link"

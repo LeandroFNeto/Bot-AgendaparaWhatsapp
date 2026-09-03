@@ -1,13 +1,18 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.WhatsappWebhookDTO;
 import com.example.demo.model.Empresa;
 import com.example.demo.repository.EmpresaRepository;
 import com.example.demo.servico.GerenciadorSessao;
 import com.example.demo.servico.observador.Observadorwhatsapp;
 import com.example.demo.strategy.FactoryModulo;
-import com.example.demo.util.WebhookHandler;
 import com.example.demo.strategy.ModuloAtendimentoStrategy;
 import com.example.demo.util.WhatsappUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,10 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/webhook")
+@Tag(name = "Webhook WhatsApp", description = "Recepção tipada de eventos do WPPConnect")
 public class ControllerWhatsapp {
 
     @Autowired private GerenciadorSessao gerenciadorSessao;
@@ -27,39 +31,31 @@ public class ControllerWhatsapp {
     @Autowired private Observadorwhatsapp observador;
 
     @PostMapping("/whatsapp")
-    public ResponseEntity<Void> receberMensagem(@RequestBody Map<String, Object> payload) {
+    @Operation(
+            summary = "Receber mensagem do WhatsApp",
+            description = "Consome WhatsappWebhookDTO (sem Map genérico). Aplica travas Anti-X9, ignora grupos/status e encaminha o texto ao módulo da empresa."
+    )
+    @ApiResponse(responseCode = "200", description = "Evento aceito. Mensagens filtradas também retornam 200 para o WPPConnect não reenviar.",
+            content = @Content(schema = @Schema(hidden = true)))
+    public ResponseEntity<Void> receberMensagem(@RequestBody WhatsappWebhookDTO payload) {
 
-        String sessao = (String) payload.get("session");
-        String tipoMensagem = (String) payload.get("type");
-
-        // 2. Instanciamos o seu utilitário para mergulhar no JSON e pegar os dados com segurança
-        WebhookHandler handler = new WebhookHandler(payload);
-        String rawFrom = handler.getRemoteJid();
-        String textoRecebido = handler.getTextoMensagem();
+        String sessao = payload.session();
+        String tipoMensagem = payload.type();
+        String rawFrom = payload.resolverRemoteJid();
+        String textoRecebido = payload.resolverTexto();
 
         try {
-            // 🛑 TRAVA ANTI-X9 (Recuperada e Protegida)
-            boolean enviadaPorMim = false;
-            if (payload.containsKey("fromMe")) {
-                enviadaPorMim = (Boolean) payload.get("fromMe");
-            } else if (payload.containsKey("id") && payload.get("id") instanceof Map) {
-                Map<String, Object> idObj = (Map<String, Object>) payload.get("id");
-                enviadaPorMim = Boolean.TRUE.equals(idObj.get("fromMe"));
-            }
-
-            if (enviadaPorMim) {
+            if (payload.enviadaPorMim()) {
                 observador.logFiltro(sessao, rawFrom, "Dono do celular digitou (Anti-X9)");
                 return ResponseEntity.ok().build();
             }
 
-            // 🛑 TRAVAS DE SEGURANÇA GERAIS
             if (rawFrom == null || rawFrom.contains("@g.us") || rawFrom.contains("status") ||
                     rawFrom.contains("@lid") || !"chat".equals(tipoMensagem)) {
                 observador.logFiltro(sessao, rawFrom, "Mensagem ignorada (Grupo, Status ou Tipo Inválido)");
                 return ResponseEntity.ok().build();
             }
 
-            // 🔍 NORMALIZAÇÃO E ESTADO
             String chaveEstado = WhatsappUtil.normalizarParaChaveEstado(rawFrom);
             Empresa empresa = empresaRepository.findBySessaoWhatsapp(sessao);
 
@@ -70,7 +66,6 @@ public class ControllerWhatsapp {
 
             String estadoAtual = gerenciadorSessao.obterEstadoAtual(chaveEstado);
 
-            // 🔀 PROCESSAMENTO
             ModuloAtendimentoStrategy estrategia = moduloFactory.obterEstrategia(empresa.getRamoDeAtuacao());
             estrategia.processarMensagem(empresa, rawFrom, textoRecebido, estadoAtual);
 

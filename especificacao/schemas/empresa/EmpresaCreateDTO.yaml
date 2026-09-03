@@ -1,0 +1,31 @@
+type: object
+description: Contrato de entrada para cadastrar uma nova empresa no SaaS (POST)
+properties:
+  nome:
+    type: string
+    description: Nome fantasia do estabelecimento
+    example: Recanto Vista Alegre
+  sessaoWhatsapp:
+    type: string
+    description: Identificador único da sessão no WPPConnect
+    example: sessao_recanto_01
+  ramoDeAtuacao:
+    type: string
+    description: Ramo de atuação usado para escolher a estratégia de atendimento
+    example: locacao
+  precoBase:
+    type: number
+    format: double
+    description: Preço base de referência da locação
+    example: 500.0
+  modulosIniciais:
+    type: array
+    description: Módulos liberados na criação da empresa
+    example:
+    - IA_GEMINI
+    - GOOGLE_CALENDAR
+    items:
+      type: string
+required:
+- nome
+- sessaoWhatsapp

@@ -1,0 +1,7 @@
+type: object
+description: Conteúdo da mensagem em objeto
+properties:
+  body:
+    type: string
+    description: Texto da mensagem
+    example: "Olá, gostaria de reservar"

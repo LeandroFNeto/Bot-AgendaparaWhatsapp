@@ -1,0 +1,39 @@
+put:
+  tags:
+  - Gerenciamento de Empresas
+  summary: Atualizar perfil pelo cliente
+  description: "Aplica EmpresaUpdateDTO: textos, links e aparência. Não altera cobrança nem infraestrutura."
+  operationId: atualizarPeloCliente
+  parameters:
+  - name: x-cliente-token
+    in: header
+    description: Token do painel do cliente
+    required: false
+    schema:
+      type: string
+  - name: sessao
+    in: path
+    description: Identificador da sessão WhatsApp da empresa
+    required: true
+    schema:
+      type: string
+    example: sessao_recanto_01
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/EmpresaUpdateDTO"
+    required: true
+  responses:
+    "200":
+      description: Perfil do cliente atualizado
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/EmpresaResponseDTO"
+    "404":
+      description: Empresa não encontrada para a sessão informada
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/EmpresaResponseDTO"

@@ -1,0 +1,9 @@
+type: object
+description: Dados aninhados da mensagem
+properties:
+  key:
+    $ref: "#/components/schemas/ChaveMensagem"
+    description: Chave da mensagem com o JID do remetente
+  message:
+    $ref: "#/components/schemas/MensagemAninhada"
+    description: Corpo aninhado da mensagem

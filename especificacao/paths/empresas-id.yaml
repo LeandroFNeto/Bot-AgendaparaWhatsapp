@@ -1,0 +1,94 @@
+get:
+  tags:
+  - empresa-entity-controller
+  description: get-empresa
+  operationId: getItemResource-empresa-get
+  parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: string
+  responses:
+    "200":
+      description: OK
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/EntityModelEmpresa"
+    "404":
+      description: Not Found
+put:
+  tags:
+  - empresa-entity-controller
+  description: update-empresa
+  operationId: putItemResource-empresa-put
+  parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/EmpresaRequestBody"
+    required: true
+  responses:
+    "200":
+      description: OK
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/EntityModelEmpresa"
+    "201":
+      description: Created
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/EntityModelEmpresa"
+    "204":
+      description: No Content
+delete:
+  tags:
+  - empresa-entity-controller
+  description: delete-empresa
+  operationId: deleteItemResource-empresa-delete
+  parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: string
+  responses:
+    "204":
+      description: No Content
+    "404":
+      description: Not Found
+patch:
+  tags:
+  - empresa-entity-controller
+  description: patch-empresa
+  operationId: patchItemResource-empresa-patch
+  parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: string
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/EmpresaRequestBody"
+    required: true
+  responses:
+    "200":
+      description: OK
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/EntityModelEmpresa"
+    "204":
+      description: No Content

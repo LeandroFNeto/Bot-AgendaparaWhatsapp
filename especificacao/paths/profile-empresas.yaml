@@ -1,0 +1,17 @@
+get:
+  tags:
+  - profile-controller
+  operationId: descriptor
+  responses:
+    "200":
+      description: OK
+      content:
+        '*/*':
+          schema:
+            type: string
+        application/alps+json:
+          schema:
+            type: string
+        application/schema+json:
+          schema:
+            $ref: "#/components/schemas/JsonSchema"

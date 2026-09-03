@@ -1,0 +1,39 @@
+type: object
+description: Payload tipado recebido do WPPConnect via webhook. Aceita o formato plano (from/body) e o aninhado (data.key / data.message).
+properties:
+  session:
+    type: string
+    description: Nome da sessão WPPConnect da empresa
+    example: sessao_recanto_01
+  type:
+    type: string
+    description: Tipo da mensagem
+    example: chat
+  fromMe:
+    type: boolean
+    description: Indica se a mensagem foi enviada pelo próprio número conectado (dono do bot)
+    example: false
+  from:
+    type: string
+    description: JID do remetente no formato plano do WPPConnect
+    example: 5511999999999@c.us
+  body:
+    type: string
+    description: Texto da mensagem no formato plano do WPPConnect
+    example: "Olá, gostaria de reservar"
+  remoteJid:
+    type: string
+    description: JID do remetente quando informado no topo do payload
+    example: 5511999999999@c.us
+  sender:
+    type: string
+    description: "Remetente alternativo, usado como fallback para JIDs @lid"
+  id:
+    $ref: "#/components/schemas/IdentificadorMensagem"
+    description: Identificador da mensagem (pode trazer fromMe em alguns provedores)
+  data:
+    $ref: "#/components/schemas/DadosWebhook"
+    description: Envelope aninhado usado por alguns formatos do WPPConnect/Baileys
+  content:
+    $ref: "#/components/schemas/ConteudoMensagem"
+    description: "Conteúdo tipado da mensagem, quando enviado em objeto"

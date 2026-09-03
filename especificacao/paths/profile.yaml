@@ -1,0 +1,11 @@
+get:
+  tags:
+  - profile-controller
+  operationId: listAllFormsOfMetadata
+  responses:
+    "200":
+      description: OK
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/RepresentationModelObject"

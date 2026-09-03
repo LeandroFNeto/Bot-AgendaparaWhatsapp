@@ -1,0 +1,7 @@
+type: object
+description: Mensagem no formato aninhado
+properties:
+  conversation:
+    type: string
+    description: Texto da conversa
+    example: "Olá, gostaria de reservar"

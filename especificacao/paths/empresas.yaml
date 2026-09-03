@@ -1,0 +1,85 @@
+get:
+  tags:
+  - empresa-entity-controller
+  description: get-empresa
+  operationId: getCollectionResource-empresa-get
+  parameters:
+  - name: page
+    in: query
+    description: Zero-based page index (0..N)
+    required: false
+    schema:
+      type: integer
+      default: 0
+      minimum: 0
+  - name: size
+    in: query
+    description: The size of the page to be returned
+    required: false
+    schema:
+      type: integer
+      default: 20
+      minimum: 1
+  - name: sort
+    in: query
+    description: "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+    required: false
+    schema:
+      type: array
+      items:
+        type: string
+  responses:
+    "200":
+      description: OK
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/PagedModelEntityModelEmpresa"
+        application/x-spring-data-compact+json:
+          schema:
+            $ref: "#/components/schemas/PagedModelEntityModelEmpresa"
+        text/uri-list:
+          schema:
+            type: string
+post:
+  tags:
+  - Gerenciamento de Empresas
+  - empresa-entity-controller
+  summary: Criar novo cliente SaaS
+  description: Cadastra uma empresa a partir de EmpresaCreateDTO e devolve EmpresaResponseDTO, sem expor a entidade JPA.
+  operationId: postCollectionResource-empresa-post
+  parameters:
+  - name: x-admin-token
+    in: header
+    description: Token administrativo do SaaS
+    required: false
+    schema:
+      type: string
+    example: sua-chave-admin
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/EmpresaCreateDTO"
+    required: true
+  responses:
+    "201":
+      description: Empresa criada com sucesso
+      content:
+        application/hal+json:
+          schema:
+            oneOf:
+            - $ref: "#/components/schemas/EmpresaResponseDTO"
+            - $ref: "#/components/schemas/EntityModelEmpresa"
+    "400":
+      description: Sessão WhatsApp já ocupada
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/EmpresaResponseDTO"
+    "401":
+      description: Token administrativo inválido
+      content:
+        application/hal+json:
+          schema:
+            $ref: "#/components/schemas/EmpresaResponseDTO"
